@@ -190,7 +190,9 @@ class Model(nn.Module):
         self.f1 = Block(nb_colors, 64)
         self.f2 = Block(64, 64)
         self.f3 = Block(64, 64)
-        self.modular = ModularNet([self.f2, self.f3], depth=3)
+        self.f4 = Block(64, 64)
+        self.f5 = Block(64, 64)
+        self.modular = ModularNet([self.f2, self.f3, self.f4, self.f5], depth=3)
         self.fc = FC(64, nb_classes)
         self.apply(weight_init)
 
