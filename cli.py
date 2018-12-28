@@ -68,7 +68,7 @@ def train(*,
             _, y_pred_class = y_pred.max(dim=1)
             acc = (y_pred_class == y).float().mean()
             if niter % log_interval == 0:
-                print(f'loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
+                print(f'niter: {niter:05d} loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
                 torch.save(model, 'model.th')
             niter += 1
 
