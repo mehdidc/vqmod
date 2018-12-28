@@ -75,7 +75,7 @@ def train(*,
                 out_idx = out_idx.cpu().flatten().detach()
                 prob = torch.zeros(len(model.modular.components))
                 for val in range(len(model.modular.components)):
-                    prob[val] = (out_idx==val).float().mean()
+                    prob[val] = (out_idx==val).float().mean() + 1e-7
                 ent = (-prob * np.log(prob)).mean()
                 print(f'niter: {niter:05d} loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} ent: {ent.item():.2f} acc: {acc.item():.2f}')
                 torch.save(model, 'model.th')
