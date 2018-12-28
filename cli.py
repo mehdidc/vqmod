@@ -32,8 +32,6 @@ def train(*,
         train_folder,
         transform=transform
     )
-    train_dataset = SubSample(train_dataset, 10)
-
     valid_dataset = ImageFolder(
         valid_folder,
         transform=transform
