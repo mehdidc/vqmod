@@ -1,12 +1,14 @@
 from clize import run
+import numpy as np
+
 import torch
 from torchvision.datasets import ImageFolder
 import torchvision.transforms as transforms
-from models import Model
-from models import ModularNet
-
 from torch.optim import Adam
 import torch.nn.functional as F
+
+from models import Model
+from models import ModularNet
 
 from data import SubSample
 
@@ -71,6 +73,19 @@ def train(*,
                 print(f'niter: {niter:05d} loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
                 torch.save(model, 'model.th')
             niter += 1
+        for loader, name in [ (train_dataloader, 'train'), (valid_dataloader, 'valid') ]:
+            accs = []
+            ce_losses = []
+            for X, y in loader:
+                X = X.to(device)
+                y = y.to(device)
+                y_pred, _, _ = model(X)
+                ce_loss = F.cross_entropy(y_pred, y)
+                acc = (y_pred_class == y).float().mean()
+                accs.append(acc.item())
+                ce_losses.append(ce_loss.item())
+            print(f'epoch {epoch} {name} acc: {np.mean(accs)} ce_loss: {np.mean(ce_losses)}')
+
 
 
 if __name__ == '__main__':
