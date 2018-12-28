@@ -1,4 +1,5 @@
 from clize import run
+from collections import Counter
 import numpy as np
 
 import torch
@@ -61,7 +62,7 @@ def train(*,
         for X, y in train_dataloader:
             X = X.to(device)
             y = y.to(device)
-            y_pred, ctl, ctl_nearest = model(X)
+            y_pred, ctl, ctl_nearest, out_idx = model(X)
             model.zero_grad()
             vq_loss = ModularNet.vq_loss_function(ctl, ctl_nearest)
             ce_loss = F.cross_entropy(y_pred, y)
@@ -71,7 +72,12 @@ def train(*,
             _, y_pred_class = y_pred.max(dim=1)
             acc = (y_pred_class == y).float().mean()
             if niter % log_interval == 0:
-                print(f'niter: {niter:05d} loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
+                out_idx = out_idx.cpu().flatten().detach()
+                prob = torch.zeros(len(model.modular.components))
+                for val in range(len(model.modular.components)):
+                    prob[val] = (out_idx==val).float().mean()
+                ent = (-prob * np.log(prob)).mean()
+                print(f'niter: {niter:05d} loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} ent: {ent.item():.2f} acc: {acc.item():.2f}')
                 torch.save(model, 'model.th')
             niter += 1
         for loader, name in [ (train_dataloader, 'train'), (valid_dataloader, 'valid') ]:
@@ -80,7 +86,8 @@ def train(*,
             for X, y in loader:
                 X = X.to(device)
                 y = y.to(device)
-                y_pred, _, _ = model(X)
+                y_pred, _, _, _ = model(X)
+                _, y_pred_class = y_pred.max(dim=1)
                 ce_loss = F.cross_entropy(y_pred, y)
                 acc = (y_pred_class == y).float().mean()
                 accs.append(acc.item())

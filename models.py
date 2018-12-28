@@ -174,7 +174,7 @@ class ModularNet(Controller):
                 y = mod(y)
             ys.append(y)
         y = torch.cat(ys, dim=0)
-        return y, ctl, ctl_nearest
+        return y, ctl, ctl_nearest, out_idx
     
     @staticmethod
     def vq_loss_function(ctl, ctl_nearest):
@@ -196,8 +196,8 @@ class Model(nn.Module):
 
     def forward(self, x):
         x = self.f1(x)
-        x, ctl, ctl_nearest = self.modular(x)
-        return self.fc(x), ctl, ctl_nearest
+        x, ctl, ctl_nearest, out_idx = self.modular(x)
+        return self.fc(x), ctl, ctl_nearest, out_idx
 
 
 if __name__ == '__main__':
