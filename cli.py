@@ -15,7 +15,8 @@ def train(*,
         valid_folder='data/mnist/valid', 
         epochs=100,
         device='cpu', 
-        num_workers=4, 
+        num_workers=4,
+        log_interval=10,
         image_size=32):
     batch_size = 32
     normalize = transforms.Normalize(
@@ -52,7 +53,7 @@ def train(*,
     model = Model()
     model = model.to(device)
     optim = Adam(model.parameters(), lr=0.001)
-
+    niter = 0
     for epoch in range(epochs):
         for X, y in train_dataloader:
             X = X.to(device)
@@ -66,7 +67,9 @@ def train(*,
             optim.step()
             _, y_pred_class = y_pred.max(dim=1)
             acc = (y_pred_class == y).float().mean()
-            print(f'loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
+            if niter % log_interval == 0:
+                print(f'loss: {loss.item():.2f}, ce: {ce_loss.item():.2f} vq: {vq_loss.item():.2f} acc: {acc.item():.2f}')
+            niter += 1
 
 
 if __name__ == '__main__':
