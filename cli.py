@@ -54,6 +54,7 @@ def train(*,
 
     model = Model()
     model = model.to(device)
+    model.transform = transform
     optim = Adam(model.parameters(), lr=0.001)
     niter = 0
     for epoch in range(epochs):
